@@ -121,7 +121,6 @@ public class PhaseManager : MonoBehaviour {
         //currentMapState = 2; // or whatever. Won't necessarily advance the phase every time
 
         //spawnedNPCs.Add(SpawnItem(spawner2, WolfPrefab, null, SpawnText2, 4));
-        //MIAO MIAO MIAO
     }
 
     private void EnterMapStateOne() {
