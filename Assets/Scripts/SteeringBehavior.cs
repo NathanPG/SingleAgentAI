@@ -61,4 +61,9 @@ public class SteeringBehavior : MonoBehaviour {
         linear_acc *= maxAcceleration;
         return linear_acc;
     }
+
+    public Vector3 Pursue()
+    {
+        return new Vector3();
+    }
 }
