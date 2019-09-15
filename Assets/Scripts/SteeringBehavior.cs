@@ -46,5 +46,19 @@ public class SteeringBehavior : MonoBehaviour {
         agent = GetComponent<NPCController>();
         //wanderOrientation = agent.orientation;
     }
+    public Vector3 seek()
+    {
+        Vector3 linear_acc = target.position - agent.position;
+        linear_acc.Normalize();
+        linear_acc *= maxAcceleration;
+        return linear_acc;
+    }
 
+    public Vector3 flee()
+    {
+        Vector3 linear_acc = agent.position - target.position;
+        linear_acc.Normalize();
+        linear_acc *= maxAcceleration;
+        return linear_acc;
+    }
 }
