@@ -94,7 +94,7 @@ public class PhaseManager : MonoBehaviour {
             return;
 
        // If we get here, we've been given a new map state, from either source
-       switch (currentMapState) {
+       switch () {
            case 0:
                EnterMapStateZero();
                break;
@@ -113,14 +113,17 @@ public class PhaseManager : MonoBehaviour {
             // ADD MORE CASES AS NEEDED
        }
     }
-
+    //Algos: seek, flee, pursue with arrive, evade, align, face, wanderbg
+    //Prefabs: PlayerPrefab, HunterPrefab, WolfPrefab, RedPrefab
+    //SpawnItem(GameObject spawner, GameObject spawnPrefab, NPCController target, Text spawnText, int mapState)
     private void EnterMapStateZero()
     {
         narrator.text = "In MapState Zero, we're going to ...";
 
         //currentMapState = 2; // or whatever. Won't necessarily advance the phase every time
 
-        //spawnedNPCs.Add(SpawnItem(spawner2, WolfPrefab, null, SpawnText2, 4));
+        spawnedNPCs.Add(SpawnItem(spawner1, HunterPrefab, WolfPrefab.GetComponent<NPCController>(), SpawnText2, 0));
+        spawnedNPCs.Add(SpawnItem(spawner1, WolfPrefab, HunterPrefab.GetComponent<NPCController>(), SpawnText2, 0));
     }
 
     private void EnterMapStateOne() {

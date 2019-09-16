@@ -46,6 +46,14 @@ public class NPCController : MonoBehaviour {
                     // do this for each phase
                     label.text = name.Replace("(Clone)","") + "\nAlgorithm: First algorithm"; 
                 }
+                if(gameObject.tag == "Wolf")
+                {
+                    linear = ai.Flee();
+                }else if (gameObject.tag == "Hunter")
+                {
+                    linear = ai.Pursue();
+                }
+                
                 // linear = ai.Pursue();   // For example
                 // angular = ai.Face();    // For example
 

@@ -46,7 +46,7 @@ public class SteeringBehavior : MonoBehaviour {
         agent = GetComponent<NPCController>();
         //wanderOrientation = agent.orientation;
     }
-    public Vector3 seek()
+    public Vector3 Seek()
     {
         Vector3 linear_acc = target.position - agent.position;
         linear_acc.Normalize();
@@ -54,7 +54,7 @@ public class SteeringBehavior : MonoBehaviour {
         return linear_acc;
     }
 
-    public Vector3 flee()
+    public Vector3 Flee()
     {
         Vector3 linear_acc = agent.position - target.position;
         linear_acc.Normalize();
@@ -64,6 +64,55 @@ public class SteeringBehavior : MonoBehaviour {
 
     public Vector3 Pursue()
     {
-        return new Vector3();
+        float dist = (target.position - agent.position).magnitude;
+        float speed = agent.velocity.magnitude;
+        float prediction = 0f;
+
+
+        if(dist < targetRadiusL)
+        {
+            return new Vector3(0,0,0);
+        }
+        else if (dist > slowRadiusL)
+        {
+            speed = maxSpeed;
+        }
+        else
+        {
+            speed = maxSpeed * dist / slowRadiusL;
+        }
+
+        if (speed <= dist / maxPrediction)
+        {
+            prediction = maxPrediction;
+        }
+        else
+        {
+            prediction = dist / speed;
+        }
+        Vector3 linear_acc = (target.position + prediction * target.velocity) - agent.position;
+        linear_acc.Normalize();
+        linear_acc *= maxAcceleration;
+        return linear_acc;
     }
+
+    public Vector3 Evade()
+    {
+        float dist = (agent.position - target.position).magnitude;
+        float speed = agent.velocity.magnitude;
+        float prediction = 0f;
+        if(speed<= dist / maxPrediction)
+        {
+            prediction = maxPrediction;
+        }
+        else
+        {
+            prediction = dist / speed;
+        }
+        Vector3 linear_acc = agent.position - (target.position + prediction * target.velocity);
+        linear_acc.Normalize();
+        linear_acc *= maxAcceleration;
+        return linear_acc;
+    }
+
 }
