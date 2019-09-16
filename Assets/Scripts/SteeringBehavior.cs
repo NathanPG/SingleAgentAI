@@ -62,8 +62,51 @@ public class SteeringBehavior : MonoBehaviour {
         return linear_acc;
     }
 
-    public Vector3 Pursue()
+    public float Align()
     {
+        float x = agent.velocity.x;
+        float y = agent.velocity.z;
+        float orient = Mathf.Atan2(x, y);
+        //Vector3 turn = new Vector3(0, 0, agent.orientation);
+        if (orient > 180)
+        {
+            return (agent.orientation / -orient) ;
+        }
+        else
+        {
+            return (agent.orientation / orient );
+        }
+        //float a = Vector3.Angle(agent.velocity, turn);
+        //return orient * agent.orientation;
+    }
+
+    public float Face()
+    {
+        Vector3 direction = agent.position - target.position;
+        float orient = Mathf.Atan2(direction.x, direction.z);
+        if (orient > 180)
+        {
+            //return ((-orient*maxAngularAcceleration) / agent.orientation);
+            return (maxAngularAcceleration * -orient);
+        }
+        else
+        {
+            //return ((orient * maxAngularAcceleration) / agent.orientation) * maxAngularAcceleration;
+            return (maxAngularAcceleration * (orient));
+        }
+        //float o = Vector3.Angle(agent.orientation, direction)
+
+
+        //return orient / agent.orientation;
+    }
+
+    public Vector3 Wander()
+    {
+        wanderOrientation += Random.Range(0, 359) * wanderOffset;
+        float targetOrientation = wanderOrientation + agent.rotation ;
+        Vector3 targetPos = agent.position + wanderOffset * new Vector3(0f, agent.orientation, 0f);
+
+
         return new Vector3();
     }
 }
