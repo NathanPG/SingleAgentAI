@@ -58,10 +58,10 @@ public class PhaseManager : MonoBehaviour {
     void Start() {
         narrator.text = "This is the place to mention major things going on during the demo, the \"narration.\"";
         spawnedNPCs = new List<GameObject>();
-        spawnedNPCs.Add(SpawnItem(spawner1, HunterPrefab, null, SpawnText1, 4));
+        //spawnedNPCs.Add(SpawnItem(spawner1, HunterPrefab, null, SpawnText1, 4));
 
-        Invoke("SpawnWolf", 12);
-        Invoke("Meeting1", 30);
+        //Invoke("SpawnWolf", 12);
+        //Invoke("Meeting1", 30);
     }
 
     /// <summary>
@@ -129,9 +129,11 @@ public class PhaseManager : MonoBehaviour {
     private void EnterMapStateOne() {
         narrator.text = "In MapState One, we're going to ...";
 
-        //currentMapState = 2; // or whatever. Won't necessarily advance the phase every time
+        currentMapState = 2; // or whatever. Won't necessarily advance the phase every time
 
-        //spawnedNPCs.Add(SpawnItem(spawner2, WolfPrefab, null, SpawnText2, 4));
+        spawnedNPCs.Add(SpawnItem(spawner2, HunterPrefab, null, SpawnText2, 2));
+        spawnedNPCs.Add(SpawnItem(spawner2, WolfPrefab, spawnedNPCs[0].GetComponent<NPCController>(), SpawnText1, 1));
+        //spawnedNPCs[0].GetComponent<NPCController>().
     }
 
     private void EnterMapStateTwo()
@@ -146,7 +148,7 @@ public class PhaseManager : MonoBehaviour {
     {
         narrator.text = "Entering MapState Three";
 
-        currentMapState = 2; // or whatever. Won't necessarily advance the phase every time
+        //currentMapState = 2; // or whatever. Won't necessarily advance the phase every time
 
         //spawnedNPCs.Add(SpawnItem(spawner2, WolfPrefab, null, SpawnText2, 4));
     }
