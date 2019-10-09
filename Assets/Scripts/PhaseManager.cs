@@ -48,13 +48,20 @@ public class PhaseManager : MonoBehaviour {
     LineRenderer line;                  // GOING AWAY
 
     public GameObject[] Path;
+    private bool phaseSet = false;
 
 
     public Text narrator;                   // 
 
     // Use this for initialization. Create any initial NPCs here and store them in the 
     // spawnedNPCs list. You can always add/remove NPCs later on.
-
+    public void ClearStage()
+    {
+        foreach (GameObject NPC in spawnedNPCs)
+        {
+            NPC.SetActive(false) ;
+        }
+    }
     void Start() {
         narrator.text = "This is the place to mention major things going on during the demo, the \"narration.\"";
         spawnedNPCs = new List<GameObject>();
@@ -62,6 +69,15 @@ public class PhaseManager : MonoBehaviour {
 
         //Invoke("SpawnWolf", 12);
         //Invoke("Meeting1", 30);
+        spawnedNPCs.Add(SpawnItem(spawner1, WolfPrefab, null, SpawnText1, 2)); //0
+        spawnedNPCs.Add(SpawnItem(spawner2, HunterPrefab, spawnedNPCs[0].GetComponent<NPCController>(), SpawnText2, 1)); //1
+        spawnedNPCs[0].GetComponent<SteeringBehavior>().target = spawnedNPCs[1].GetComponent<NPCController>();
+        spawnedNPCs.Add(SpawnItem(spawner1, WolfPrefab, null, SpawnText1, 3)); //2
+        spawnedNPCs.Add(SpawnItem(spawner3, RedPrefab, spawnedNPCs[2].GetComponent<NPCController>(), SpawnText3, 4)); //3
+        spawnedNPCs.Add(SpawnItem(spawner2, HunterPrefab, spawnedNPCs[2].GetComponent<NPCController>(), SpawnText2, 5)); //4
+        spawnedNPCs[2].GetComponent<SteeringBehavior>().target = spawnedNPCs[3].GetComponent<NPCController>();
+        spawnedNPCs.Add(SpawnItem(spawner1, RedPrefab, null, SpawnText1, 6)); //5
+        ClearStage();
     }
 
     /// <summary>
@@ -94,24 +110,31 @@ public class PhaseManager : MonoBehaviour {
             return;
 
        // If we get here, we've been given a new map state, from either source
-       switch () {
+       switch (currentMapState) {
            case 0:
+               phaseSet = false;
                EnterMapStateZero();
                break;
 
            case 1:
+               phaseSet = false;
                EnterMapStateOne();
                break;
 
            case 2:
+                phaseSet = false;
                EnterMapStateTwo();
                break;
 
            case 3:
+                phaseSet = false;
+                EnterMapStateThree();
                break;
-
-            // ADD MORE CASES AS NEEDED
-       }
+           case 4:
+                EnterMapStateFour();
+                break;
+                // ADD MORE CASES AS NEEDED
+        }
     }
     //Algos: seek, flee, pursue with arrive, evade, align, face, wanderbg
     //Prefabs: PlayerPrefab, HunterPrefab, WolfPrefab, RedPrefab
@@ -122,35 +145,79 @@ public class PhaseManager : MonoBehaviour {
 
         //currentMapState = 2; // or whatever. Won't necessarily advance the phase every time
 
-        spawnedNPCs.Add(SpawnItem(spawner1, HunterPrefab, WolfPrefab.GetComponent<NPCController>(), SpawnText2, 0));
-        spawnedNPCs.Add(SpawnItem(spawner1, WolfPrefab, HunterPrefab.GetComponent<NPCController>(), SpawnText2, 0));
+        //spawnedNPCs.Add(SpawnItem(spawner3, HunterPrefab, null, SpawnText2, 7));
+        //spawnedNPCs.Add(SpawnItem(spawner1, HunterPrefab, WolfPrefab.GetComponent<NPCController>(), SpawnText2, 0));
+        //spawnedNPCs.Add(SpawnItem(spawner1, WolfPrefab, HunterPrefab.GetComponent<NPCController>(), SpawnText2, 0));
     }
 
     private void EnterMapStateOne() {
         narrator.text = "In MapState One, we're going to ...";
+        if (phaseSet == false)
+        {
+            ClearStage();
+            //currentMapState = 2; // or whatever. Won't necessarily advance the phase every time
 
-        currentMapState = 2; // or whatever. Won't necessarily advance the phase every time
+            currentMapState = 0;
+            narrator.text = "In MapState One, hunter seeks for the wolf, wolf flees from the hunter";
+            spawnedNPCs[0].SetActive(true);
+            spawnedNPCs[1].SetActive(true);
+            //spawner1.transform.position = new Vector3(0, 1f, -10f);
+            //spawner2.transform.position = new Vector3(10f, 1f, -20f);
+            //spawnedNPCs.Add(SpawnItem(spawner1, WolfPrefab, null, SpawnText1, 2));
+            //spawnedNPCs.Add(SpawnItem(spawner2, HunterPrefab, spawnedNPCs[0].GetComponent<NPCController>(), SpawnText2, 1));
+            //spawnedNPCs[0].GetComponent<SteeringBehavior>().target = spawnedNPCs[1].GetComponent<NPCController>();
+            phaseSet = true;
+        }
 
-        spawnedNPCs.Add(SpawnItem(spawner2, HunterPrefab, null, SpawnText2, 2));
-        spawnedNPCs.Add(SpawnItem(spawner2, WolfPrefab, spawnedNPCs[0].GetComponent<NPCController>(), SpawnText1, 1));
-        //spawnedNPCs[0].GetComponent<NPCController>().
+        //it's spawning both because it's going straight to the next map state, try leaving a buffer map state in between
+        //and not changing that one
     }
 
     private void EnterMapStateTwo()
     {
-        narrator.text = "Entering MapState Two";
-
-        currentMapState = 3; // or whatever. Won't necessarily advance the phase every time
-
-        //spawnedNPCs.Add(SpawnItem(spawner2, WolfPrefab, null, SpawnText2, 4));
+        if (phaseSet == false)
+        {
+            ClearStage();
+            //narrator.text = "Entering MapState Two";
+            currentMapState = 0;
+            narrator.text = "In MapState TWO, wolf purses red, red evade, hunter do arrive algo to the red";
+            spawnedNPCs[2].SetActive(true);
+            spawnedNPCs[3].SetActive(true);
+            spawnedNPCs[4].SetActive(true);
+            //spawner1.transform.position = new Vector3(10f, 1f, 0);
+            //spawner2.transform.position = new Vector3(-10f, 1f, 0);
+            //spawner3.transform.position = new Vector3(10f, 1f, -10f);
+            //spawnedNPCs.Add(SpawnItem(spawner1, WolfPrefab, null, SpawnText1, 3));
+            //spawnedNPCs.Add(SpawnItem(spawner3, RedPrefab, spawnedNPCs[0].GetComponent<NPCController>(), SpawnText3, 4));
+            //spawnedNPCs.Add(SpawnItem(spawner2, HunterPrefab, spawnedNPCs[0].GetComponent<NPCController>(), SpawnText2, 5));
+            //spawnedNPCs[0].GetComponent<SteeringBehavior>().target = spawnedNPCs[1].GetComponent<NPCController>();
+            phaseSet = true;
+        }
+        //currentMapState = 2;
     }
     private void EnterMapStateThree()
     {
-        narrator.text = "Entering MapState Three";
+        if (phaseSet == false)
+        {
+            ClearStage();
+           // narrator.text = "Entering MapState Two";
+            //currentMapState = 0;
+            narrator.text = "In MapState TWO, wolf purses red, red evade, hunter do arrive algo to the red";
+            currentMapState = 0;
+            spawnedNPCs[5].SetActive(true);
+            //spawner1.transform.position = new Vector3(0, 1f, -10f);
+            //spawnedNPCs.Add(SpawnItem(spawner1, RedPrefab, null, SpawnText1, 6));
+            phaseSet = true;
+        }
+
 
         //currentMapState = 2; // or whatever. Won't necessarily advance the phase every time
 
         //spawnedNPCs.Add(SpawnItem(spawner2, WolfPrefab, null, SpawnText2, 4));
+    }
+    private void EnterMapStateFour()
+    {
+        currentMapState = 4;
     }
 
 

@@ -20,7 +20,7 @@ public class NPCController : MonoBehaviour {
 
     public int mapState;            // use this to control which "phase" the demo is in
 
-    private Vector3 linear;         // The resilts of the kinematic steering requested
+    public Vector3 linear;         // The resilts of the kinematic steering requested
     private float angular;          // The resilts of the kinematic steering requested
 
     public Text label;              // Used to displaying text nearby the agent as it moves around
@@ -39,53 +39,64 @@ public class NPCController : MonoBehaviour {
     /// 
     /// </summary>
     void FixedUpdate() {
-        switch (mapState) {
+        switch (mapState)
+        {
             case 1:
-                if (label) {
-                    // replace "First algorithm" with the name of the actual algorithm you're demoing
-                    // do this for each phase
-                    label.text = name.Replace("(Clone)","") + "\nAlgorithm: First algorithm"; 
+                if (label)
+                {
+                    label.text = name.Replace("(Clone)", "") + "\nAlgorithm: Seek+Face";
                 }
-                linear = ai.seek();   // For example
-                angular = ai.Align();    // For example
-
-                // linear = ai.whatever();  -- replace with the desired calls
-                // angular = ai.whatever();
+                linear = ai.Seek();   
+                angular = ai.Face();  
                 break;
 
             case 2:
-                if (label) {
-                    label.text = name.Replace("(Clone)", "") + "\nAlgorithm: Second algorithm";
+                if (label)
+                {
+                    label.text = name.Replace("(Clone)", "") + "\nAlgorithm: Flee+Align";
                 }
 
-                linear = ai.flee(); 
-                // angular = ai.whatever();
+                linear = ai.Flee();
+                angular = ai.Align();
                 break;
 
             case 3:
-                if (label) {
-                    label.text = name.Replace("(Clone)", "") + "\nAlgorithm: Third algorithm";
+                if (label)
+                {
+                    label.text = name.Replace("(Clone)", "") + "\nAlgorithm: Pursue+Face";
                 }
-
-                // linear = ai.whatever();  -- replace with the desired calls
-                // angular = ai.whatever();
+                linear = ai.Pursue();
+                angular = ai.Face();
                 break;
 
             case 4:
-                if (label) {
-                    label.text = name.Replace("(Clone)", "") + "\nAlgorithm: Fourth algorithm";
+                if (label)
+                {
+                    label.text = name.Replace("(Clone)", "") + "\nAlgorithm: Evade+Align";
                 }
-
-                // linear = ai.whatever();  -- replace with the desired calls
-                // angular = ai.whatever();
+                linear = ai.Evade();
+                angular = ai.Align();
                 break;
             case 5:
-                if (label) {
-                    label.text = name.Replace("(Clone)", "") + "\nAlgorithm: Fifth algorithm";
+                if (label)
+                {
+                    label.text = name.Replace("(Clone)", "") + "\nAlgorithm: Arrive+Face";
                 }
-
-                // linear = ai.whatever();  -- replace with the desired calls
-                // angular = ai.whatever();
+                linear = ai.Arrive();
+                angular = ai.Face();
+                break;
+            case 6:
+                if (label)
+                {
+                    label.text = name.Replace("(Clone)", "") + "\nAlgorithm: Wander";
+                }
+                angular = ai.Wander(out linear);
+                break;
+            case 7:
+                if (label)
+                {
+                    label.text = name.Replace("(Clone)", "") + "\n Waiting";
+                }
                 break;
 
                 // ADD CASES AS NEEDED

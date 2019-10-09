@@ -46,7 +46,8 @@ public class SteeringBehavior : MonoBehaviour {
         agent = GetComponent<NPCController>();
         //wanderOrientation = agent.orientation;
     }
-    public Vector3 seek()
+    
+    public Vector3 Seek()
     {
         Vector3 linear_acc = target.position - agent.position;
         linear_acc.Normalize();
@@ -54,7 +55,7 @@ public class SteeringBehavior : MonoBehaviour {
         return linear_acc;
     }
 
-    public Vector3 flee()
+    public Vector3 Flee()
     {
         Vector3 linear_acc = agent.position - target.position;
         linear_acc.Normalize();
@@ -62,51 +63,268 @@ public class SteeringBehavior : MonoBehaviour {
         return linear_acc;
     }
 
-    public float Align()
+    public Vector3 Evade()
     {
-        float x = agent.velocity.x;
-        float y = agent.velocity.z;
-        float orient = Mathf.Atan2(x, y);
-        //Vector3 turn = new Vector3(0, 0, agent.orientation);
-        if (orient > 180)
+        float dist = (target.position - agent.position).magnitude;
+        float speed = agent.velocity.magnitude;
+
+        float prediction = 0f;
+        if(speed <= dist / maxPrediction)
         {
-            return (agent.orientation / -orient) ;
+            prediction = maxPrediction;
         }
         else
         {
-            return (agent.orientation / orient );
+            prediction = dist / speed;
         }
-        //float a = Vector3.Angle(agent.velocity, turn);
-        //return orient * agent.orientation;
+        Vector3 linear_acc = agent.position - (target.position + target.velocity * prediction);
+        linear_acc.Normalize();
+        linear_acc *= maxAcceleration;
+        return linear_acc;
+    }
+
+    public Vector3 Pursue()
+    {
+        float dist = (target.position - agent.position).magnitude;
+        float speed = agent.velocity.magnitude;
+
+        float prediction = 0f;
+        if (speed <= dist / maxPrediction)
+        {
+            prediction = maxPrediction;
+        }
+        else
+        {
+            prediction = dist / speed;
+        }
+        Vector3 linear_acc = (target.position + target.velocity * prediction) - agent.position;
+        linear_acc.Normalize();
+        linear_acc *= maxAcceleration;
+        return linear_acc;
+    }
+
+    public Vector3 Arrive()
+    {
+        Vector3 direct = target.position - agent.position;
+        float dist = direct.magnitude;
+        float speed = agent.velocity.magnitude;
+        if (dist < targetRadiusL)
+        {
+            return new Vector3(0, 0, 0);
+        }
+        else if (dist > slowRadiusL)
+        {
+            speed = maxSpeed;
+        }
+        else
+        {
+            speed = maxSpeed * dist / slowRadiusL;
+        }
+        Vector3 targetVelocity = direct;
+        targetVelocity.Normalize();
+        targetVelocity *= speed;
+        Vector3 linear_acc = (targetVelocity - agent.velocity) / timeToTarget;
+
+        if (linear_acc.magnitude > maxAcceleration)
+        {
+            linear_acc.Normalize();
+            linear_acc *= maxAcceleration;
+        }
+        return linear_acc;
+    }
+
+    public float Align()
+    {
+        if (agent.velocity.magnitude == 0)
+        {
+            return 0;
+        }
+        float targetRotation;
+
+        float x = agent.velocity.x;
+        float y = agent.velocity.z;
+        float orient = Mathf.Atan2(x, y);
+        float turn = 2 * Mathf.PI;
+        orient -= agent.orientation;
+        if (orient > Mathf.PI)
+        {
+            while (orient > Mathf.PI)
+            {
+                orient -= turn;
+            }
+        }
+        if (orient < -Mathf.PI)
+        {
+            while (orient < -Mathf.PI)
+            {
+                orient += turn;
+            }
+        }
+        float absoluteOrient = Mathf.Abs(orient);
+        if (absoluteOrient < (targetRadiusA))
+        {
+            agent.rotation = 0;
+        }
+        if (absoluteOrient > (slowRadiusA))
+        {
+            targetRotation = maxRotation;
+        }
+        else
+        {
+            targetRotation = maxRotation * absoluteOrient / slowRadiusA;
+        }
+        targetRotation *= orient / absoluteOrient;
+        float angular = targetRotation - agent.rotation;
+        angular /= timeToTarget;
+        //Debug.Log("Rot: " + angular);
+        float angularAcceleration = Mathf.Abs(angular);
+        //Debug.Log("Agent " + agent.orientation);
+        return angular;
     }
 
     public float Face()
     {
-        Vector3 direction = agent.position - target.position;
-        float orient = Mathf.Atan2(direction.x, direction.z);
-        if (orient > 180)
+        float targetRotation;
+
+        Vector3 direction = target.position - agent.position;
+        if (direction.magnitude == 0)
         {
-            //return ((-orient*maxAngularAcceleration) / agent.orientation);
-            return (maxAngularAcceleration * -orient);
+            return 0;
+        }
+        float orient = Mathf.Atan2(direction.x, direction.z);
+        float turn = 2 * Mathf.PI;
+        orient -= agent.orientation;
+        if (orient > Mathf.PI)
+        {
+            while (orient > Mathf.PI)
+            {
+                orient -= turn;
+            }
+        }
+        if (orient < -Mathf.PI)
+        {
+            while (orient < -Mathf.PI)
+            {
+                orient += turn;
+            }
+        }
+        float absoluteOrient = Mathf.Abs(orient);
+        if (absoluteOrient < (targetRadiusA / 2))
+        {
+            agent.rotation = 0;
+        }
+        if (absoluteOrient > (slowRadiusA))
+        {
+            targetRotation = maxRotation;
         }
         else
         {
-            //return ((orient * maxAngularAcceleration) / agent.orientation) * maxAngularAcceleration;
-            return (maxAngularAcceleration * (orient));
+            targetRotation = maxRotation * absoluteOrient / slowRadiusA;
         }
-        //float o = Vector3.Angle(agent.orientation, direction)
 
 
-        //return orient / agent.orientation;
+        targetRotation *= orient / absoluteOrient;
+        float angular = targetRotation - agent.rotation;
+        angular /= timeToTarget;
+        //Debug.Log("Rot: " + angular);
+        float angularAcceleration = Mathf.Abs(angular);
+        if (angularAcceleration > maxAngularAcceleration)
+        {
+            angular /= angularAcceleration;
+            angular *= maxAngularAcceleration;
+        }
+        //Debug.Log("Agent " + agent.orientation);
+        return angular;
     }
 
-    public Vector3 Wander()
+    public float Wander(out Vector3 linear)
     {
-        wanderOrientation += Random.Range(0, 359) * wanderOffset;
-        float targetOrientation = wanderOrientation + agent.rotation ;
-        Vector3 targetPos = agent.position + wanderOffset * new Vector3(0f, agent.orientation, 0f);
+        //float angle = Random.Range(0, 359) * wanderRate;
+        //Vector3 
+        //float x = Mathf.Sin(Mathf.Deg2Rad * agent.orientation) * wanderRadius;
+        //float z = Mathf.Cos(Mathf.Deg2Rad * agent.orientation) * wanderRadius;
 
 
-        return new Vector3();
+
+
+
+        //wanderOrientation += Random.Range(0, 359) * wanderRate;
+        wanderOrientation += (Random.value - Random.value) * wanderRate;
+        Vector3 target = agent.position + wanderOffset * new Vector3(Mathf.Sin(agent.orientation), 0, Mathf.Cos(agent.orientation));
+        float orientation = wanderOrientation + agent.orientation;
+        agent.DrawCircle(target, wanderRadius);
+        target += wanderRadius * new Vector3(Mathf.Sin(orientation), 0, Mathf.Cos(orientation));
+        float targetRotation;
+
+        Vector3 direction = target - agent.position;
+        if (direction.magnitude == 0)
+        {
+            linear = Vector3.zero;
+            return 0;
+        }
+        float orient = Mathf.Atan2(direction.x, direction.z);
+        float turn = 2 * Mathf.PI;
+        orient -= agent.orientation;
+        if (orient > Mathf.PI)
+        {
+            while (orient > Mathf.PI)
+            {
+                orient -= turn;
+            }
+        }
+        if (orient < -Mathf.PI)
+        {
+            while (orient < -Mathf.PI)
+            {
+                orient += turn;
+            }
+        }
+        float absoluteOrient = Mathf.Abs(orient);
+        if (absoluteOrient < (targetRadiusA / 2))
+        {
+            agent.rotation = 0;
+        }
+        if (absoluteOrient > (slowRadiusA))
+        {
+            targetRotation = maxRotation;
+        }
+        else
+        {
+            targetRotation = maxRotation * absoluteOrient / slowRadiusA;
+        }
+        targetRotation *= orient / absoluteOrient;
+        float angular = targetRotation - agent.rotation;
+        angular /= timeToTarget;
+        //Debug.Log("Rot: " + angular);
+        float angularAcceleration = Mathf.Abs(angular);
+        if (angularAcceleration > maxAngularAcceleration)
+        {
+            angular /= angularAcceleration;
+            angular *= maxAngularAcceleration;
+        }
+
+        linear = maxAcceleration * new Vector3(Mathf.Sin(agent.orientation), 0, Mathf.Cos(agent.orientation));
+        //Debug.Log("Agent " + agent.orientation);
+        return angular;
+
+
+        //Vector3 towards = new Vector3(x, 0f, z);
+
+        /*float centerX = Mathf.Sin(Mathf.Deg2Rad * agent.orientation) * wanderOffset;
+        float centerZ = Mathf.Cos(Mathf.Deg2Rad * agent.orientation) * wanderOffset;
+        Debug.Log("Circle: " + centerX + " " + centerZ);
+        Debug.Log("Agent orientation " + agent.orientation);
+        Vector3 centerCircle = new Vector3 (centerX, 0f, centerZ);
+        Vector3 newPos = centerCircle + agent.position;
+        //Debug.Log("New position of circle" + newPos);
+        //centerCircle += agent.position;
+        //Debug.Log("Position of circle: " + centerCircle);
+        //towards += agent.position;
+        //Debug.Log("Towards: " + towards);
+        //towards += centerCircle;
+        //Debug.Log("Towards: " + towards);
+        towards *= maxAcceleration;
+
+        return towards;*/
     }
 }
